@@ -1,12 +1,12 @@
 import { Metadata } from 'next';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
-import firebaseConfig from '../../../../firebase-applet-config.json';
+import { firebaseConfig, firestoreDatabaseId } from '@/lib/firebase-config';
 import { BoutiqueClientDetail } from './BoutiqueClientDetail';
 import { notFound } from 'next/navigation';
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const db = getFirestore(app, firestoreDatabaseId);
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
     const docRef = doc(db, 'products', params.id);

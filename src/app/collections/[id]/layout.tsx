@@ -1,10 +1,10 @@
 import { Metadata } from 'next';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { initializeApp, getApps } from 'firebase/app';
-import firebaseConfig from '../../../../firebase-applet-config.json';
+import { firebaseConfig, firestoreDatabaseId } from '@/lib/firebase-config';
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const db = getFirestore(app, firestoreDatabaseId);
 
 type Props = {
   params: Promise<{ id: string }> | { id: string };

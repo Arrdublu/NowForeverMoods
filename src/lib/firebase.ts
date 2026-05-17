@@ -1,8 +1,9 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore, doc, getDocFromServer, initializeFirestore } from 'firebase/firestore';
+import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-import firebaseConfig from '../../firebase-applet-config.json';
+
+import { firebaseConfig, firestoreDatabaseId } from './firebase-config';
 
 let app: any = null;
 let auth: Auth | null = null;
@@ -12,6 +13,9 @@ let storage: FirebaseStorage | null = null;
 function getAppInstance() {
   if (!app) {
     if (getApps().length === 0) {
+      if (!firebaseConfig.apiKey) {
+        console.warn("Firebase API key is missing. Check your environment variables.");
+      }
       app = initializeApp(firebaseConfig);
     } else {
       app = getApp();
@@ -30,7 +34,7 @@ export function getAuthService(): Auth {
 export function getDb(): Firestore {
   if (!db) {
      const appInstance = getAppInstance();
-     const dbId = firebaseConfig.firestoreDatabaseId || "(default)";
+     const dbId = firestoreDatabaseId || "(default)";
      try {
        // Standard initialization is preferred
        db = getFirestore(appInstance, dbId);

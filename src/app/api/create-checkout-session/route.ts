@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore/lite';
-import firebaseConfig from '../../../../firebase-applet-config.json';
+import { firebaseConfig, firestoreDatabaseId } from '@/lib/firebase-config';
 
 // Initialize Firebase if not already initialized
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+const db = getFirestore(app, firestoreDatabaseId);
 
 let stripeInstance: Stripe | null = null;
 
