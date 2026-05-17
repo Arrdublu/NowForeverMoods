@@ -1,0 +1,44 @@
+{
+  "name": "nowforevermoods",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@base-ui/react": "latest",
+    "@google/genai": "latest",
+    "@hookform/resolvers": "^3.3.4",
+    "@stripe/react-stripe-js": "^2.7.0",
+    "@stripe/stripe-js": "^3.3.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "date-fns": "^3.6.0",
+    "firebase": "^10.10.0",
+    "firebase-admin": "^12.0.0",
+    "lucide-react": "^0.368.0",
+    "motion": "^11.11.0",
+    "next": "14.2.3",
+    "react": "^18",
+    "react-day-picker": "^9.4.1",
+    "react-dom": "^18",
+    "react-hook-form": "^7.51.2",
+    "stripe": "^15.1.0",
+    "tailwind-merge": "^2.2.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "postcss": "^8",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^5"
+  }
+}

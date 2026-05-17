@@ -1,0 +1,247 @@
+src/components/ui/label.tsx:import * as React from "react"
+src/components/ui/label.tsx:import { cn } from "@/lib/utils"
+src/components/ui/calendar.tsx:import * as React from "react"
+src/components/ui/calendar.tsx:import {
+src/components/ui/calendar.tsx:import { cn } from "@/lib/utils"
+src/components/ui/calendar.tsx:import { Button, buttonVariants } from "@/components/ui/button"
+src/components/ui/calendar.tsx:import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
+src/components/ui/progress.tsx:import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
+src/components/ui/progress.tsx:import { cn } from "@/lib/utils"
+src/components/ui/card.tsx:import * as React from "react"
+src/components/ui/card.tsx:import { cn } from "@/lib/utils"
+src/components/ui/tabs.tsx:import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
+src/components/ui/tabs.tsx:import { cva, type VariantProps } from "class-variance-authority"
+src/components/ui/tabs.tsx:import { cn } from "@/lib/utils"
+src/components/ui/scroll-area.tsx:import * as React from "react"
+src/components/ui/scroll-area.tsx:import { ScrollArea as ScrollAreaPrimitive } from "@base-ui/react/scroll-area"
+src/components/ui/scroll-area.tsx:import { cn } from "@/lib/utils"
+src/components/ui/badge.tsx:import { mergeProps } from "@base-ui/react/merge-props"
+src/components/ui/badge.tsx:import { useRender } from "@base-ui/react/use-render"
+src/components/ui/badge.tsx:import { cva, type VariantProps } from "class-variance-authority"
+src/components/ui/badge.tsx:import { cn } from "@/lib/utils"
+src/components/ui/input.tsx:import * as React from "react"
+src/components/ui/input.tsx:import { Input as InputPrimitive } from "@base-ui/react/input"
+src/components/ui/input.tsx:import { cn } from "@/lib/utils"
+src/components/ui/textarea.tsx:import * as React from "react"
+src/components/ui/textarea.tsx:import { cn } from "@/lib/utils"
+src/components/ui/button.tsx:import { Button as ButtonPrimitive } from "@base-ui/react/button"
+src/components/ui/button.tsx:import { cva, type VariantProps } from "class-variance-authority"
+src/components/ui/button.tsx:import { cn } from "@/lib/utils"
+src/components/ui/dialog.tsx:import * as React from "react"
+src/components/ui/dialog.tsx:import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
+src/components/ui/dialog.tsx:import { cn } from "@/lib/utils"
+src/components/ui/dialog.tsx:import { Button } from "@/components/ui/button"
+src/components/ui/dialog.tsx:import { XIcon } from "lucide-react"
+src/components/AdminMediaUploader.tsx:import React, { useState, useEffect, useRef } from "react";
+src/components/AdminMediaUploader.tsx:import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
+src/components/AdminMediaUploader.tsx:import { getDb, getStorageService, handleFirestoreError } from "../lib/firebase";
+src/components/AdminMediaUploader.tsx:import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+src/components/AdminMediaUploader.tsx:import { Type, GoogleGenAI } from "@google/genai";
+src/components/AdminMediaUploader.tsx:import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+src/components/AdminMediaUploader.tsx:import { Button } from "@/components/ui/button";
+src/components/AdminMediaUploader.tsx:import { Input } from "@/components/ui/input";
+src/components/AdminMediaUploader.tsx:import { Label } from "@/components/ui/label";
+src/components/AdminMediaUploader.tsx:import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+src/components/AdminMediaUploader.tsx:import { Textarea } from "@/components/ui/textarea";
+src/components/AdminMediaUploader.tsx:import { Upload, Trash2, Edit2, FileImage, FileVideo, AlertCircle, Loader2 } from "lucide-react";
+src/components/AdminMediaUploader.tsx:import { Progress } from "@/components/ui/progress";
+src/components/AdminDashboard.tsx:import React, { useState, useEffect } from "react";
+src/components/AdminDashboard.tsx:import {
+src/components/AdminDashboard.tsx:import { getDb, getAuthService, handleFirestoreError } from "../lib/firebase";
+src/components/AdminDashboard.tsx:import { AdminMediaUploader } from "./AdminMediaUploader";
+src/components/AdminDashboard.tsx:import { AdminPackagesEditor } from "./AdminPackagesEditor";
+src/components/AdminDashboard.tsx:import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+src/components/AdminDashboard.tsx:import { Badge } from "@/components/ui/badge";
+src/components/AdminDashboard.tsx:import { ScrollArea } from "@/components/ui/scroll-area";
+src/components/AdminDashboard.tsx:import { Button } from "@/components/ui/button";
+src/components/AdminDashboard.tsx:import { Input } from "@/components/ui/input";
+src/components/AdminDashboard.tsx:import { Label } from "@/components/ui/label";
+src/components/AdminDashboard.tsx:import {
+src/components/AdminDashboard.tsx:import { format, startOfDay, endOfDay } from "date-fns";
+src/components/AdminDashboard.tsx:import { useRouter } from "next/navigation";
+src/components/AdminDashboard.tsx:import { motion } from "motion/react";
+src/components/AdminDashboard.tsx:import {
+src/components/BookingForm.tsx:import { useState, useEffect } from "react";
+src/components/BookingForm.tsx:import { useForm } from "react-hook-form";
+src/components/BookingForm.tsx:import { zodResolver } from "@hookform/resolvers/zod";
+src/components/BookingForm.tsx:import * as z from "zod";
+src/components/BookingForm.tsx:import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+src/components/BookingForm.tsx:import { Button } from "@/components/ui/button";
+src/components/BookingForm.tsx:import { Input } from "@/components/ui/input";
+src/components/BookingForm.tsx:import { Label } from "@/components/ui/label";
+src/components/BookingForm.tsx:import { Calendar } from "@/components/ui/calendar";
+src/components/BookingForm.tsx:import { format, startOfDay } from "date-fns";
+src/components/BookingForm.tsx:import { Calendar as CalendarIcon, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+src/components/BookingForm.tsx:import { motion } from "motion/react";
+src/components/BookingForm.tsx:import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+src/components/BookingForm.tsx:import { getDb, getAuthService, handleFirestoreError } from "../lib/firebase";
+src/components/BookingForm.tsx:import { Currency } from "../hooks/useGeoPricing";
+src/components/BookingForm.tsx:import { StripePayment } from "./StripePayment";
+src/components/BookingForm.tsx:import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+src/components/Legal.tsx:import * as React from 'react';
+src/components/Legal.tsx:import { motion } from 'motion/react';
+src/components/Legal.tsx:import { Shield, Scale, HelpCircle, MessageSquare, Book, FileText, Users, Mail } from 'lucide-react';
+src/components/Legal.tsx:import { Button } from '@/components/ui/button';
+src/components/Navbar.tsx:import { useState, useEffect } from "react";
+src/components/Navbar.tsx:import { usePathname } from "next/navigation";
+src/components/Navbar.tsx:import { getAuthService } from "../lib/firebase";
+src/components/Navbar.tsx:import { useGeoPricing } from "../hooks/useGeoPricing";
+src/components/Navbar.tsx:import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from "firebase/auth";
+src/components/Navbar.tsx:import { Button } from "@/components/ui/button";
+src/components/Navbar.tsx:import Link from 'next/link';
+src/components/Navbar.tsx:import { motion, useScroll, useTransform } from "motion/react";
+src/components/Navbar.tsx:import { User as UserIcon, Menu, X } from "lucide-react";
+src/components/Navbar.tsx:import { collection, doc, getDoc, setDoc } from "firebase/firestore";
+src/components/Navbar.tsx:import { getDb } from "../lib/firebase";
+src/components/Navbar.tsx:import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+src/components/Portfolio.tsx:import { useState, useEffect } from 'react';
+src/components/Portfolio.tsx:import { motion, AnimatePresence } from 'motion/react';
+src/components/Portfolio.tsx:import { Facebook, Twitter, Pin, Instagram, X } from 'lucide-react';
+src/components/Portfolio.tsx:import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+src/components/Portfolio.tsx:import { getDb, handleFirestoreError } from '../lib/firebase';
+src/components/Portfolio.tsx:import {
+src/components/Checkout.tsx:import React, { useState } from 'react';
+src/components/Checkout.tsx:import { CreditCard, Lock, ShieldCheck } from 'lucide-react';
+src/components/LaunchModal.tsx:import { useState, useEffect } from 'react';
+src/components/LaunchModal.tsx:import { motion, AnimatePresence } from 'motion/react';
+src/components/LaunchModal.tsx:import { X } from 'lucide-react';
+src/components/LaunchModal.tsx:import { Button } from '@/components/ui/button';
+src/components/ExperienceCard.tsx:import * as React from 'react';
+src/components/ExperienceCard.tsx:import { useState, useRef } from 'react';
+src/components/ExperienceCard.tsx:import { motion, AnimatePresence } from 'motion/react';
+src/components/ExperienceCard.tsx:import { 
+src/components/ExperienceCard.tsx:import { Button } from '@/components/ui/button';
+src/components/ExperienceCard.tsx:import { Badge } from '@/components/ui/badge';
+src/components/Packages.tsx:import * as React from 'react';
+src/components/Packages.tsx:import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+src/components/Packages.tsx:import { Button } from "@/components/ui/button";
+src/components/Packages.tsx:import { motion } from "motion/react";
+src/components/Packages.tsx:import { Currency } from "../hooks/useGeoPricing";
+src/components/Packages.tsx:import { CinematicPackage } from "./CinematicPackage";
+src/components/UserBookings.tsx:import { useState, useEffect } from "react";
+src/components/UserBookings.tsx:import { collection, query, where, onSnapshot, doc, deleteDoc, updateDoc } from "firebase/firestore";
+src/components/UserBookings.tsx:import { getDb, getAuthService } from "../lib/firebase";
+src/components/UserBookings.tsx:import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+src/components/UserBookings.tsx:import { Button } from "@/components/ui/button";
+src/components/UserBookings.tsx:import { Badge } from "@/components/ui/badge";
+src/components/UserBookings.tsx:import { format } from "date-fns";
+src/components/UserBookings.tsx:import { Trash2, Edit2, X } from "lucide-react";
+src/components/UserBookings.tsx:import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+src/components/UserBookings.tsx:import { Input } from "@/components/ui/input";
+src/components/StripePayment.tsx:import * as React from 'react';
+src/components/StripePayment.tsx:import { useState, useEffect, FormEvent } from 'react';
+src/components/StripePayment.tsx:import { loadStripe } from '@stripe/stripe-js';
+src/components/StripePayment.tsx:import {
+src/components/StripePayment.tsx:import { Button } from '@/components/ui/button';
+src/components/StripePayment.tsx:import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+src/components/ExperienceCollections.tsx:import React, { useState, useRef, useEffect } from 'react';
+src/components/ExperienceCollections.tsx:import { motion, AnimatePresence } from 'motion/react';
+src/components/ExperienceCollections.tsx:import { useGeoPricing, Currency } from '../hooks/useGeoPricing';
+src/components/ExperienceCollections.tsx:import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+src/components/ExperienceCollections.tsx:import { collection, addDoc, onSnapshot, query } from 'firebase/firestore';
+src/components/ExperienceCollections.tsx:import { getDb, getAuthService } from '../lib/firebase';
+src/components/ExperienceCollections.tsx:import { Loader2, Plus, ArrowRight, Video, Sparkles, Check, Package } from 'lucide-react';
+src/components/ExperienceCollections.tsx:import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+src/components/ExperienceCollections.tsx:import { StripePayment } from './StripePayment';
+src/components/ExperienceCollections.tsx:import { Button } from '@/components/ui/button';
+src/components/ExperienceCollections.tsx:import { Badge } from '@/components/ui/badge';
+src/components/ExperienceCollections.tsx:import { BookingForm } from './BookingForm';
+src/components/AdminPackagesEditor.tsx:import React, { useState, useEffect } from "react";
+src/components/AdminPackagesEditor.tsx:import { collection, query, onSnapshot, updateDoc, doc, setDoc, addDoc, deleteDoc } from "firebase/firestore";
+src/components/AdminPackagesEditor.tsx:import { Plus, Trash2, Loader2 } from "lucide-react";
+src/components/AdminPackagesEditor.tsx:import { getDb, handleFirestoreError } from "../lib/firebase";
+src/components/AdminPackagesEditor.tsx:import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+src/components/AdminPackagesEditor.tsx:import { Button } from "@/components/ui/button";
+src/components/AdminPackagesEditor.tsx:import { Input } from "@/components/ui/input";
+src/components/AdminPackagesEditor.tsx:import { Textarea } from "@/components/ui/textarea";
+src/components/AdminPackagesEditor.tsx:import { Label } from "@/components/ui/label";
+src/components/CinematicPackage.tsx:import * as React from 'react';
+src/components/CinematicPackage.tsx:import { useState, useRef, useEffect } from 'react';
+src/components/CinematicPackage.tsx:import { motion, AnimatePresence } from 'motion/react';
+src/components/CinematicPackage.tsx:import { 
+src/components/CinematicPackage.tsx:import { Button } from '@/components/ui/button';
+src/components/CinematicPackage.tsx:import { Badge } from '@/components/ui/badge';
+src/components/LazyVideo.tsx:import { useEffect, useRef, useState } from 'react';
+src/components/CinematicHero.tsx:import { motion } from "motion/react";
+src/components/CinematicHero.tsx:import { LazyVideo } from "./LazyVideo";
+src/app/api/admin/purge-project/route.ts:import { NextResponse } from 'next/server';
+src/app/api/admin/purge-project/route.ts:import { adminDb, adminStorage, adminAuth } from '@/lib/firebase-admin';
+src/app/api/admin/sanitize/route.ts:import { NextRequest, NextResponse } from 'next/server';
+src/app/api/admin/sanitize/route.ts:import { getApps, initializeApp, cert } from 'firebase-admin/app';
+src/app/api/admin/sanitize/route.ts:import { getFirestore, Timestamp } from 'firebase-admin/firestore';
+src/app/api/admin/sanitize/route.ts:import { getStorage } from 'firebase-admin/storage';
+src/app/api/admin/sanitize/route.ts:import { getAuth } from 'firebase-admin/auth';
+src/app/api/admin/sanitize/route.ts:import firebaseConfig from '../../../../../firebase-applet-config.json'; 
+src/app/api/health/route.ts:import { NextResponse } from 'next/server';
+src/app/api/health/route.ts:import { getDb } from '@/lib/firebase';
+src/app/api/health/route.ts:import { doc, getDocFromServer } from 'firebase/firestore';
+src/app/api/webhooks/payment/route.ts:import { NextResponse } from 'next/server';
+src/app/api/webhooks/payment/route.ts:import Stripe from 'stripe';
+src/app/api/webhooks/payment/route.ts:import * as admin from 'firebase-admin';
+src/app/api/webhooks/payment/route.ts:import { getFirestore } from 'firebase-admin/firestore';
+src/app/api/webhooks/payment/route.ts:import firebaseConfig from '../../../../../firebase-applet-config.json';
+src/app/api/create-checkout-session/route.ts:import { NextResponse } from 'next/server';
+src/app/api/create-checkout-session/route.ts:import Stripe from 'stripe';
+src/app/api/create-checkout-session/route.ts:import { initializeApp, getApps } from 'firebase/app';
+src/app/api/create-checkout-session/route.ts:import { getFirestore, doc, getDoc } from 'firebase/firestore';
+src/app/api/create-checkout-session/route.ts:import firebaseConfig from '../../../../firebase-applet-config.json';
+src/app/api/create-payment-intent/route.ts:import { NextResponse } from 'next/server';
+src/app/api/create-payment-intent/route.ts:import Stripe from 'stripe';
+src/app/api/create-payment-intent/route.ts:import { initializeApp, getApps } from 'firebase/app';
+src/app/api/create-payment-intent/route.ts:import { getFirestore, doc, getDoc } from 'firebase/firestore';
+src/app/api/create-payment-intent/route.ts:import firebaseConfig from '../../../../firebase-applet-config.json';
+src/app/support/page.tsx:import { Support } from "@/components/Legal";
+src/app/page.tsx:import { CinematicHero } from "@/components/CinematicHero";
+src/app/page.tsx:import { Portfolio } from "@/components/Portfolio";
+src/app/page.tsx:import { ExperienceCollections } from "@/components/ExperienceCollections";
+src/app/page.tsx:import { LaunchModal } from "@/components/LaunchModal";
+src/app/page.tsx:import { Suspense } from "react";
+src/app/booking/success/page.tsx:import { useEffect, useState } from "react";
+src/app/booking/success/page.tsx:import { getAuthService } from "@/lib/firebase";
+src/app/booking/success/page.tsx:import { onAuthStateChanged, User, GoogleAuthProvider, linkWithPopup } from "firebase/auth";
+src/app/booking/success/page.tsx:import { Button } from "@/components/ui/button";
+src/app/booking/success/page.tsx:import { Loader2, CheckCircle2, ShieldCheck, Mail } from "lucide-react";
+src/app/packages/page.tsx:import { ExperienceCollections } from "@/components/ExperienceCollections";
+src/app/terms/page.tsx:import { Terms } from "@/components/Legal";
+src/app/privacy/page.tsx:import { Privacy } from "@/components/Legal";
+src/app/dashboard/page.tsx:import { UserBookings } from "@/components/UserBookings";
+src/app/admin/page.tsx:import { AdminDashboard } from "@/components/AdminDashboard";
+src/app/admin/login/page.tsx:import { useState, useEffect } from "react";
+src/app/admin/login/page.tsx:import { signInWithPopup, GoogleAuthProvider, signOut } from "firebase/auth";
+src/app/admin/login/page.tsx:import { getAuthService, getDb } from "@/lib/firebase";
+src/app/admin/login/page.tsx:import { doc, getDoc, setDoc } from "firebase/firestore";
+src/app/admin/login/page.tsx:import { useRouter } from "next/navigation";
+src/app/admin/login/page.tsx:import { motion } from "motion/react";
+src/app/admin/login/page.tsx:import { Button } from "@/components/ui/button";
+src/app/verify-backend/page.tsx:import { useState, useEffect } from 'react';
+src/app/verify-backend/page.tsx:import { getDb, testConnection } from '@/lib/firebase';
+src/app/verify-backend/page.tsx:import { CheckCircle, XCircle, Loader2, Globe, Database, ShieldCheck } from 'lucide-react';
+src/app/layout.tsx:import type { Metadata } from "next";
+src/app/layout.tsx:import { Montserrat, Cormorant_Garamond } from 'next/font/google';
+src/app/layout.tsx:import "./globals.css";
+src/app/layout.tsx:import { Navbar } from "@/components/Navbar";
+src/app/collections/[id]/page.tsx:import React, { useEffect, useState } from 'react';
+src/app/collections/[id]/page.tsx:import { useParams, useRouter } from 'next/navigation';
+src/app/collections/[id]/page.tsx:import { collection, doc, getDoc } from 'firebase/firestore';
+src/app/collections/[id]/page.tsx:import { getDb } from '@/lib/firebase';
+src/app/collections/[id]/page.tsx:import { useGeoPricing } from '@/hooks/useGeoPricing';
+src/app/collections/[id]/page.tsx:import { motion } from 'motion/react';
+src/app/collections/[id]/page.tsx:import { BookingForm } from '@/components/BookingForm';
+src/app/collections/[id]/page.tsx:import { Button } from '@/components/ui/button';
+src/app/collections/[id]/page.tsx:import { Loader2, ArrowLeft } from 'lucide-react';
+src/app/collections/[id]/page.tsx:import { Badge } from '@/components/ui/badge';
+src/main.tsx:import React from 'react'
+src/main.tsx:import ReactDOM from 'react-dom/client'
+src/main.tsx:import App from './App.tsx'
+src/main.tsx:import './index.css'
+src/lib/utils.ts:import { clsx, type ClassValue } from "clsx"
+src/lib/utils.ts:import { twMerge } from "tailwind-merge"
+src/lib/firebase.ts:import { initializeApp, getApps, getApp } from 'firebase/app';
+src/lib/firebase.ts:import { getAuth, Auth } from 'firebase/auth';
+src/lib/firebase.ts:import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
+src/lib/firebase.ts:import { getStorage, FirebaseStorage } from 'firebase/storage';
+src/lib/firebase.ts:import firebaseConfig from '../../firebase-applet-config.json';
+src/lib/firebase-admin.ts:import * as admin from 'firebase-admin';
+src/lib/firebase-admin.ts:import firebaseConfig from '../../firebase-applet-config.json';
+src/hooks/useGeoPricing.ts:import { useState, useEffect } from 'react';
+src/App.tsx:import Checkout from './components/Checkout';

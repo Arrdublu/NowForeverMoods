@@ -1,0 +1,208 @@
+import { NextResponse } from 'next/server';
+import Stripe from 'stripe';
+import * as admin from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import firebaseConfig from '../../../../../firebase-applet-config.json';
+
+let dbInstance: admin.firestore.Firestore | null = null;
+function getAdminDb() {
+    if (!dbInstance) {
+        if (!admin.apps.length) {
+            try {
+                admin.initializeApp({
+                    projectId: firebaseConfig.projectId
+                });
+            } catch (e) {
+                console.warn("Firebase Admin fallback init:", e);
+                admin.initializeApp();
+            }
+        }
+        dbInstance = getFirestore(firebaseConfig.firestoreDatabaseId);
+    }
+    return dbInstance;
+}
+
+let stripeInstance: Stripe | null = null;
+function getStripe(): Stripe {
+    if (!stripeInstance) {
+        const key = process.env.STRIPE_SECRET_KEY;
+        if (!key) throw new Error('STRIPE_SECRET_KEY is required');
+        stripeInstance = new Stripe(key);
+    }
+    return stripeInstance;
+}
+
+export async function POST(req: Request) {
+    const sig = req.headers.get("stripe-signature");
+    if (!process.env.STRIPE_WEBHOOK_SECRET || !sig) {
+        return NextResponse.json({ error: "Service not configured" }, { status: 400 });
+    }
+
+    const body = await req.text();
+    let event;
+    try {
+        event = getStripe().webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+    } catch (err: any) {
+        return NextResponse.json({ error: `Verification Error: ${err.message}` }, { status: 400 });
+    }
+
+    if (event.type === "checkout.session.completed") {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const { bookingId, orderId, userId } = session.metadata || {};
+
+        if (orderId) {
+            try {
+                const db = getAdminDb();
+                await db.collection('transactions').add({
+                    sessionId: session.id,
+                    orderId,
+                    userId,
+                    amount: session.amount_total ? session.amount_total / 100 : 0,
+                    currency: session.currency?.toUpperCase(),
+                    status: 'completed',
+                    createdAt: admin.firestore.Timestamp.now(),
+                });
+
+                await db.collection('orders').doc(orderId).update({
+                    status: 'paid',
+                    stripeSessionId: session.id,
+                    updatedAt: admin.firestore.Timestamp.now(),
+                });
+
+                const orderSnapshot = await db.collection('orders').doc(orderId).get();
+                const orderData = orderSnapshot.data();
+
+                if (orderData?.userEmail) {
+                    const productId = orderData?.productId;
+                    const productSnapshot = await db.collection('products').doc(productId).get();
+                    const productData = productSnapshot.data();
+
+                    if (productData?.isDigital && productData?.downloadUrl) {
+                        // Queue email
+                        await db.collection('mail').add({
+                            to: [orderData.userEmail],
+                            message: {
+                                subject: `Your NFM Digital Download: ${orderData.productName}`,
+                                html: `
+                                    <h2>Thank you for your purchase from the NowForeverMoods Boutique!</h2>
+                                    <p>You can download <strong>${orderData.productName}</strong> using the secure link below.</p>
+                                    <a href="${productData.downloadUrl}" style="display:inline-block;padding:10px 20px;background:#1a1a1a;color:#fff;text-decoration:none;">Download Your Files</a>
+                                `
+                            }
+                        });
+                        
+                        await db.collection('orders').doc(orderId).update({
+                            downloadSent: true
+                        });
+                    } else if (!productData?.isDigital) {
+                        // Decrement stock for physical
+                        if (productData?.inStock && productData.inStock > 0) {
+                            await db.collection('products').doc(productId).update({
+                                inStock: admin.firestore.FieldValue.increment(-1)
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to sync order payment:", error);
+            }
+        } else if (bookingId) {
+            try {
+                const db = getAdminDb();
+                await db.collection('transactions').add({
+                    sessionId: session.id,
+                    bookingId,
+                    userId,
+                    amount: session.amount_total ? session.amount_total / 100 : 0,
+                    currency: session.currency?.toUpperCase(),
+                    status: 'completed',
+                    createdAt: admin.firestore.Timestamp.now(),
+                });
+
+                await db.collection('bookings').doc(bookingId).update({
+                    paymentStatus: 'paid',
+                    status: 'confirmed',
+                    updatedAt: admin.firestore.Timestamp.now(),
+                });
+
+                // Trigger admin notification for successful payment
+                const bookingSnapshot = await db.collection('bookings').doc(bookingId).get();
+                const bookingData = bookingSnapshot.data();
+                
+                await db.collection('mail').add({
+                    to: ['hi@arrdublu.us', 'ioka@arrdublu.us'],
+                    message: {
+                        subject: `Payment Secured: ${bookingData?.packageName || 'Session'}`,
+                        html: `
+                            <h2>New Payment Confirmed</h2>
+                            <p><strong>Client:</strong> ${bookingData?.userName || 'Client'} (${bookingData?.userEmail})</p>
+                            <p><strong>Package:</strong> ${bookingData?.packageName}</p>
+                            <p><strong>Amount Paid:</strong> ${session.currency?.toUpperCase()} ${session.amount_total ? session.amount_total / 100 : 0}</p>
+                            <p>The booking has been updated to <strong>confirmed</strong> status.</p>
+                        `
+                    }
+                });
+
+                if (bookingData?.packageId === 'beauty-architecture') {
+                    if (bookingData?.userEmail) {
+                        await db.collection('mail').add({
+                            to: [bookingData.userEmail],
+                            message: {
+                                subject: `Beauty Architecture: Prep & Glow Guide`,
+                                html: `
+                                    <h2>Your Beauty Architecture Session is Confirmed</h2>
+                                    <p>Hi ${bookingData?.userName || 'there'},</p>
+                                    <p>Your payment is secure and your private studio time is reserved. Get ready for an incredible session.</p>
+                                    <div style="background-color: #f9f9f9; padding: 15px; margin: 20px 0; border: 1px solid #eee;">
+                                        <h3 style="margin-top: 0;">Receipt of Payment</h3>
+                                        <p><strong>Amount Paid:</strong> ${session.currency?.toUpperCase()} ${(session.amount_total ? session.amount_total / 100 : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                                        <p><strong>Package:</strong> ${bookingData?.packageName}</p>
+                                    </div>
+                                    <h3>Maintaining the Glow (Mini-Guide)</h3>
+                                    <ul>
+                                        <li><strong>Exfoliate lightly</strong> 24-48 hours before your session (no harsh scrubs).</li>
+                                        <li><strong>Hydrate intensely</strong> — drink plenty of water starting today.</li>
+                                        <li><strong>Rest well</strong> the night before.</li>
+                                        <li>Arrive with a clean, freshly moisturized face.</li>
+                                    </ul>
+                                    <p>We'll take care of the full skin prep and editorial makeup application.</p>
+                                    <p>See you in the studio!</p>
+                                    <p>— Ioka & Arrdublu</p>
+                                `
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to sync payment:", error);
+            }
+        }
+    } else if (event.type === "payment_intent.succeeded") {
+        const intent = event.data.object as Stripe.PaymentIntent;
+        const { bookingId, userId } = intent.metadata || {};
+
+        if (bookingId) {
+            try {
+                const db = getAdminDb();
+                await db.collection('transactions').add({
+                    paymentIntentId: intent.id,
+                    bookingId,
+                    userId,
+                    amount: intent.amount / 100,
+                    currency: intent.currency.toUpperCase(),
+                    status: 'completed',
+                    createdAt: admin.firestore.Timestamp.now(),
+                });
+
+                await db.collection('bookings').doc(bookingId).update({
+                    paymentStatus: 'paid',
+                    status: 'confirmed',
+                    updatedAt: admin.firestore.Timestamp.now(),
+                });
+            } catch (error) {
+                console.error("Failed to sync payment intent:", error);
+            }
+        }
+    }
+    return NextResponse.json({ verified: true });
+}

@@ -1,0 +1,6 @@
+{
+  "name": "NowForeverMoods",
+  "description": "A high-fidelity fusion of editorial cinematography and professional makeup artistry. Defining the moods of modern luxury in the Caribbean and beyond.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

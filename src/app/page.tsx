@@ -1,0 +1,47 @@
+import { CinematicHero } from "@/components/CinematicHero";
+import { Portfolio } from "@/components/Portfolio";
+import { ExperienceCollections } from "@/components/ExperienceCollections";
+import { LaunchModal } from "@/components/LaunchModal";
+import { Suspense } from "react";
+
+export default function Page() {
+  return (
+    <div className="min-h-screen bg-brand-bg text-brand-text">
+        <LaunchModal />
+        <Suspense fallback={<div className="text-white p-24">Loading...</div>}>
+            <CinematicHero 
+              title="Visual Legacy Captured."
+              subtitle="A high-fidelity fusion of editorial cinematography and professional makeup artistry. Defining the moods of modern luxury across the Caribbean and beyond."
+              tagline="NowForeverMoods Collective v2026.05.11"
+            />
+        </Suspense>
+        {/* Portfolio Section */}
+        <div className="w-full bg-brand-bg relative pb-32">
+          {/* Version banner for verification */}
+          <div className="bg-brand-black text-brand-white text-[8px] py-1 text-center uppercase tracking-widest opacity-50">
+            Deployed: 2026-05-11 17:18 GMT
+          </div>
+          <div className="max-w-7xl mx-auto px-8 md:px-12 pt-16">
+            <div className="mb-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div>
+                <span className="text-[10px] uppercase tracking-[0.6em] text-brand-accent font-bold mb-4 block">Archive 24/25</span>
+                <h2 className="text-5xl md:text-7xl font-serif text-brand-black tracking-tighter italic">The Portfolio</h2>
+              </div>
+              <p className="text-brand-muted text-[11px] uppercase tracking-[0.2em] font-bold max-w-xs leading-relaxed italic">
+                Curated architectural moments and cinematic transformations by Arrdublu & Ioka.
+              </p>
+            </div>
+            <Suspense fallback={<div className="text-white p-24">Loading portfolio...</div>}>
+                <Portfolio />
+            </Suspense>
+          </div>
+        </div>
+
+        {/* Collections Section */}
+        {/* Deployment trigger: 2026-05-11T17:02:00Z */}
+        <Suspense fallback={<div className="text-white p-24">Loading collections...</div>}>
+          <ExperienceCollections />
+        </Suspense>
+      </div>
+  );
+}
