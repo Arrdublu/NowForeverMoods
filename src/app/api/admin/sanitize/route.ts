@@ -3,7 +3,7 @@ import { getApps, initializeApp, cert } from 'firebase-admin/app';
 import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 import { getAuth } from 'firebase-admin/auth';
-import { firebaseConfig } from '@/lib/firebase-config'; 
+import firebaseConfig from '../../../../../firebase-applet-config.json'; 
 
 if (getApps().length === 0) {
   initializeApp({

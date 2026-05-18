@@ -5,9 +5,8 @@ import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { getDb, handleFirestoreError } from '../lib/firebase';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { X, ArrowUpRight, Share, Search, MoreHorizontal, Tag as TagIcon, Filter } from 'lucide-react';
+import { X, ArrowUpRight, Share, Search, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import Image from 'next/image';
 import img1 from '@/assets/images/regenerated_image_1778833092121.webp';
@@ -44,19 +43,8 @@ export function Portfolio() {
   const [loading, setLoading] = useState(true);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [activeTheme, setActiveTheme] = useState("All");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
-  const [showTagFilters, setShowTagFilters] = useState(false);
-
-  // Derive available tags from loaded items
-  const availableTags = Array.from(new Set(
-    items.flatMap(item => [
-      ...(item.tags || []),
-      ...(item.artistry_themes || []),
-      ...(item.metadata_tags || [])
-    ])
-  )).filter(tag => typeof tag === 'string' && tag.length > 0).sort();
 
   useEffect(() => {
     const q = query(collection(getDb(), 'portfolio_items'), orderBy('createdAt', 'desc'));
@@ -72,35 +60,16 @@ export function Portfolio() {
   }, []);
 
   const filteredItems = items.filter(item => {
-    // Category check
-    const matchesTheme = activeTheme === "All" || item.theme_category === activeTheme || item.category === activeTheme;
-    
-    // Tag check (Additive)
-    const itemTags = [
-      ...(item.tags || []),
-      ...(item.artistry_themes || []),
-      ...(item.metadata_tags || [])
-    ].map(t => String(t).toLowerCase());
-
-    const matchesTags = selectedTags.length === 0 || 
-      selectedTags.every(tag => itemTags.includes(tag.toLowerCase()));
-
-    // Search check
+    const matchesTheme = activeTheme === "All" || item.theme_category === activeTheme || item.category === activeTheme || (item.tags && item.tags.includes(activeTheme));
     const query = searchQuery.toLowerCase();
     const matchesSearch = query === "" || 
       (item.title && item.title.toLowerCase().includes(query)) ||
       (item.description && item.description.toLowerCase().includes(query)) ||
       (item.author && item.author.toLowerCase().includes(query)) ||
-      itemTags.some(tag => tag.includes(query));
+      (item.tags && item.tags.some((tag: string) => tag.toLowerCase().includes(query)));
       
-    return matchesTheme && matchesTags && matchesSearch;
+    return matchesTheme && matchesSearch;
   });
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
-    );
-  };
 
   const handleShare = async (itemToShare: any = selectedItem) => {
     if (!itemToShare) return;
@@ -136,46 +105,29 @@ export function Portfolio() {
       {/* Category Bar and Search */}
       <div className="w-full border-b border-brand-line bg-brand-bg sticky top-0 z-20">
         <div className="flex flex-col md:flex-row md:items-center justify-between max-w-[1600px] mx-auto px-4 md:px-8">
-          <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="flex overflow-x-auto no-scrollbar gap-6 min-w-0 py-4 w-full md:w-auto">
-              {LEGACY_THEMES.map((theme) => (
-                <button
-                  key={theme}
-                  onClick={() => {
-                    setActiveTheme(theme);
-                    // Optionally clear tags when changing main theme
-                    // setSelectedTags([]);
-                  }}
-                  className={cn(
-                    "text-xs whitespace-nowrap uppercase tracking-[0.2em] font-medium transition-all duration-300 relative py-2",
-                    activeTheme === theme ? "text-brand-ink" : "text-brand-muted hover:text-brand-ink/70"
-                  )}
-                >
-                  {theme}
-                  {activeTheme === theme && (
-                    <motion.div
-                      layoutId="activeCategory"
-                      className="absolute bottom-0 left-0 right-0 h-[1px] bg-brand-ink"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    />
-                  )}
-                </button>
-              ))}
-            </div>
-            
-            <button 
-              onClick={() => setShowTagFilters(!showTagFilters)}
-              className={cn(
-                "hidden md:flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold px-4 py-2 border rounded-full transition-colors",
-                showTagFilters || selectedTags.length > 0 ? "border-brand-ink text-brand-ink bg-brand-ink/5" : "border-brand-line text-brand-muted hover:border-brand-muted"
-              )}
-            >
-              <Filter size={12} />
-              Tags {selectedTags.length > 0 && `(${selectedTags.length})`}
-            </button>
+          <div className="flex overflow-x-auto no-scrollbar gap-6 min-w-0 py-4 w-full md:w-auto">
+            {LEGACY_THEMES.map((theme) => (
+              <button
+                key={theme}
+                onClick={() => setActiveTheme(theme)}
+                className={cn(
+                  "text-xs whitespace-nowrap uppercase tracking-[0.2em] font-medium transition-all duration-300 relative py-2",
+                  activeTheme === theme ? "text-brand-ink" : "text-brand-muted hover:text-brand-ink/70"
+                )}
+              >
+                {theme}
+                {activeTheme === theme && (
+                  <motion.div
+                    layoutId="activeCategory"
+                    className="absolute bottom-0 left-0 right-0 h-[1px] bg-brand-ink"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  />
+                )}
+              </button>
+            ))}
           </div>
 
-          <div className="relative w-full md:w-64 pb-4 md:pb-0 flex-shrink-0 flex items-center justify-center gap-2">
+          <div className="relative w-full md:w-64 pb-4 md:pb-0 flex-shrink-0 flex items-center justify-center">
             <div className="relative w-full text-brand-muted focus-within:text-brand-black transition-colors">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none" />
               <input
@@ -186,78 +138,8 @@ export function Portfolio() {
                 className="w-full bg-transparent border border-brand-line rounded-full pl-10 pr-4 py-2 text-[10px] uppercase font-bold tracking-widest text-brand-black focus:outline-none focus:border-brand-ink/50 transition-colors placeholder:normal-case placeholder:font-normal placeholder:tracking-normal"
               />
             </div>
-            <button 
-              onClick={() => setShowTagFilters(!showTagFilters)}
-              className="md:hidden p-2 text-brand-muted border border-brand-line rounded-full"
-            >
-              <Filter size={16} />
-            </button>
           </div>
         </div>
-
-        {/* Tags Expandable Area */}
-        <AnimatePresence>
-          {(showTagFilters || selectedTags.length > 0) && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="overflow-hidden bg-brand-surface/50 border-t border-brand-line"
-            >
-              <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-4">
-                <div className="flex flex-wrap gap-2 items-center">
-                  <span className="text-[10px] uppercase tracking-widest font-bold text-brand-muted mr-2 flex items-center gap-1">
-                    <TagIcon size={12} /> Filter by Tags:
-                  </span>
-                  
-                  {availableTags.length > 0 ? (
-                    availableTags.slice(0, 20).map(tag => (
-                      <button
-                        key={tag}
-                        onClick={() => toggleTag(tag)}
-                        className={cn(
-                          "px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-medium transition-all",
-                          selectedTags.includes(tag)
-                            ? "bg-brand-ink text-white"
-                            : "bg-brand-bg text-brand-muted border border-brand-line hover:border-brand-muted"
-                        )}
-                      >
-                        {tag}
-                      </button>
-                    ))
-                  ) : (
-                    <span className="text-[10px] text-brand-muted italic uppercase tracking-widest">No tags available</span>
-                  )}
-
-                  {selectedTags.length > 0 && (
-                    <button 
-                      onClick={() => setSelectedTags([])}
-                      className="ml-auto text-[10px] uppercase tracking-widest font-bold text-brand-accent hover:underline flex items-center gap-1"
-                    >
-                      <X size={12} /> Clear Filters
-                    </button>
-                  )}
-                </div>
-                
-                {selectedTags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-brand-line/50">
-                    <span className="text-[10px] uppercase tracking-widest font-bold text-brand-ink/60 mr-2">Selected:</span>
-                    {selectedTags.map(tag => (
-                      <Badge 
-                        key={tag} 
-                        variant="secondary" 
-                        className="bg-brand-ink/10 text-brand-ink hover:bg-brand-ink/20 cursor-pointer flex items-center gap-1 text-[10px] px-2"
-                        onClick={() => toggleTag(tag)}
-                      >
-                        {tag} <X size={10} />
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
       </div>
 
       {/* Masonry Grid */}
@@ -417,23 +299,10 @@ export function Portfolio() {
 
                    {/* Tags / Themes */}
                    <div className="flex flex-wrap gap-2 pt-2">
-                     {(selectedItem.artistry_themes || selectedItem.tags || selectedItem.metadata_tags || ["Editorial", "Tonal Mastery", "Raw Intimacy"]).map((tag: string) => (
-                       <button 
-                         key={tag} 
-                         onClick={() => {
-                           if (!selectedTags.includes(tag)) {
-                             toggleTag(tag);
-                             setShowTagFilters(true);
-                           }
-                           setSelectedItem(null);
-                         }}
-                         className={cn(
-                           "bg-zinc-800/80 border border-white/10 text-zinc-300 px-5 py-2 rounded-full text-sm font-medium transition-colors",
-                           selectedTags.includes(tag) ? "bg-brand-accent/20 border-brand-accent/50 text-brand-accent" : "hover:bg-zinc-700"
-                         )}
-                       >
+                     {(selectedItem.artistry_themes || selectedItem.tags || ["Editorial", "Tonal Mastery", "Raw Intimacy"]).map((tag: string) => (
+                       <span key={tag} className="bg-zinc-800/80 border border-white/10 text-zinc-300 px-5 py-2 rounded-full text-sm font-medium">
                          {tag}
-                       </button>
+                       </span>
                      ))}
                    </div>
                    

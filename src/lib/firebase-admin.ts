@@ -1,5 +1,5 @@
 import * as admin from 'firebase-admin';
-import { firebaseConfig, firestoreDatabaseId } from './firebase-config';
+import firebaseConfig from '../../firebase-applet-config.json';
 
 console.log("DEBUG: Initializing Admin SDK with project:", firebaseConfig.projectId);
 if (!admin.apps.length) {
@@ -16,7 +16,7 @@ if (!admin.apps.length) {
 export const adminDb = admin.firestore();
 console.log("DEBUG: Admin Db created.");
 
-adminDb.settings({ databaseId: firestoreDatabaseId });
+adminDb.settings({ databaseId: firebaseConfig.firestoreDatabaseId });
 console.log("DEBUG: Admin Db settings set.");
 export const adminAuth = admin.auth();
 console.log("DEBUG: Admin Auth created.");

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
-import { firebaseConfig, firestoreDatabaseId } from '@/lib/firebase-config';
+import firebaseConfig from '../../../../../firebase-applet-config.json';
 
 let dbInstance: admin.firestore.Firestore | null = null;
 function getAdminDb() {
@@ -17,7 +17,7 @@ function getAdminDb() {
                 admin.initializeApp();
             }
         }
-        dbInstance = getFirestore(firestoreDatabaseId);
+        dbInstance = getFirestore(firebaseConfig.firestoreDatabaseId);
     }
     return dbInstance;
 }

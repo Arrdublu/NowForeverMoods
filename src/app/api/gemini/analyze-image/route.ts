@@ -1,4 +1,4 @@
-import { GoogleGenAI, SchemaType } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -14,25 +14,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing image data or mime type" }, { status: 400 });
     }
 
-    const genAI = new GoogleGenAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash", // Using 1.5 flash which is modern and fast
-      generationConfig: {
+    const ai = new GoogleGenAI({ apiKey });
+    
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [
+        {
+          role: "user",
+          parts: [
+            {
+              inlineData: {
+                data: image,
+                mimeType,
+              }
+            },
+            {
+              text: "Analyze this image for a photography portfolio. Generate a selection of metadata."
+            }
+          ]
+        }
+      ],
+      config: {
         responseMimeType: "application/json",
         responseSchema: {
-          type: SchemaType.OBJECT,
+          type: Type.OBJECT,
           properties: {
             title: {
-              type: SchemaType.STRING,
+              type: Type.STRING,
               description: "A short, descriptive title for the image (max 5 words, title case)."
             },
             description: {
-              type: SchemaType.STRING,
+              type: Type.STRING,
               description: "A detailed, evocative 1-2 sentence description for the image."
             },
             tags: {
-              type: SchemaType.ARRAY,
-              items: { type: SchemaType.STRING },
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
               description: "A list of 3-7 relevant aesthetic or subject matter tags."
             }
           },
@@ -41,20 +58,7 @@ export async function POST(req: NextRequest) {
       }
     });
 
-    const prompt = "Analyze this image for a photography portfolio. Generate a selection of metadata.";
-
-    const result = await model.generateContent([
-      {
-        inlineData: {
-          mimeType: mimeType,
-          data: image
-        }
-      },
-      prompt
-    ]);
-
-    const response = await result.response;
-    const text = response.text();
+    const text = response.text || "{}";
     
     return NextResponse.json(JSON.parse(text));
   } catch (error: any) {

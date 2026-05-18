@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { collection, query, orderBy, onSnapshot, updateDoc, doc, deleteDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { getDb, getStorageService, handleFirestoreError } from "../lib/firebase";
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
+import { Type, GoogleGenAI } from "@google/genai";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,6 +115,7 @@ export function AdminMediaUploader({
       // Auto-tagging and titling via Gemini Vision for images
       if (type === "image") {
         try {
+          const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY });
           const base64Data = await new Promise<string>((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {
@@ -124,25 +126,53 @@ export function AdminMediaUploader({
             reader.readAsDataURL(file);
           });
 
-          const response = await fetch('/api/gemini/analyze-image', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+          const response = await ai.models.generateContent({
+            model: "gemini-3-flash-preview",
+            contents: {
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: file.type,
+                    data: base64Data
+                  }
+                },
+                {
+                  text: "Analyze this image for a photography portfolio. Generate a short, highly descriptive title (max 5 words, title case), a detailed, evocative 1-2 sentence description, and a list of 3-7 relevant aesthetic or subject matter tags."
+                }
+              ]
             },
-            body: JSON.stringify({
-              image: base64Data,
-              mimeType: file.type
-            }),
+            config: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                  title: {
+                    type: Type.STRING,
+                    description: "A short, descriptive title for the image."
+                  },
+                  description: {
+                    type: Type.STRING,
+                    description: "A detailed, evocative 1-2 sentence description for the image."
+                  },
+                  tags: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: "Relevant tags."
+                  }
+                },
+                required: ["title", "description", "tags"]
+              }
+            }
           });
 
-          if (response.ok) {
-            const parsed = await response.json();
+          if (response.text) {
+            const parsed = JSON.parse(response.text.trim());
             if (parsed.title) generatedTitle = parsed.title;
             if (parsed.description) generatedDescription = parsed.description;
             if (parsed.tags && Array.isArray(parsed.tags)) generatedTags = parsed.tags;
           }
         } catch (error) {
-          console.error("Gemini analysis failed:", error);
+          handleFirestoreError(error, 'write' as any, 'gemini_tagging');
           // Fallback to original name, empty tags - silently ignoring AI failure
         }
       }

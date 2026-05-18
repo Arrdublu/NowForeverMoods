@@ -1,9 +1,8 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, Firestore, doc, getDocFromServer, initializeFirestore } from 'firebase/firestore';
 import { getStorage, FirebaseStorage } from 'firebase/storage';
-
-import { firebaseConfig, firestoreDatabaseId } from './firebase-config';
+import firebaseConfig from '../../firebase-applet-config.json';
 
 let app: any = null;
 let auth: Auth | null = null;
@@ -13,9 +12,6 @@ let storage: FirebaseStorage | null = null;
 function getAppInstance() {
   if (!app) {
     if (getApps().length === 0) {
-      if (!firebaseConfig.apiKey) {
-        console.warn("Firebase API key is missing. Check your environment variables.");
-      }
       app = initializeApp(firebaseConfig);
     } else {
       app = getApp();
@@ -34,7 +30,7 @@ export function getAuthService(): Auth {
 export function getDb(): Firestore {
   if (!db) {
      const appInstance = getAppInstance();
-     const dbId = firestoreDatabaseId || "(default)";
+     const dbId = firebaseConfig.firestoreDatabaseId || "(default)";
      try {
        // Standard initialization is preferred
        db = getFirestore(appInstance, dbId);
@@ -86,17 +82,9 @@ function safeStringify(obj: any): string {
   try {
     return JSON.stringify(obj, (key, value) => {
       if (typeof value === 'object' && value !== null) {
-        if (cache.has(value)) {
-          return '[Circular]';
-        }
-        
-        // IDENTIFY FIRESTORE/FIREBASE INTERNAL OBJECTS
+        // Avoid serializing huge objects or those with deep internal state likely to be circular
         const constructorName = value.constructor?.name;
-        
-        // These are common minified or internal names that cause circularity
-        const isInternal = 
-          constructorName === 'Y' || 
-          constructorName === 'Ka' || 
+        if (
           constructorName === 'Firestore' || 
           constructorName === 'Auth' || 
           constructorName === 'FirebaseAppImpl' ||
@@ -104,21 +92,10 @@ function safeStringify(obj: any): string {
           constructorName === 'Query' ||
           constructorName === 'CollectionReference' ||
           constructorName === 'DocumentSnapshot' ||
-          constructorName === 'FirestoreImpl' ||
-          constructorName === 'Transaction' ||
-          constructorName === 'FieldValue' ||
-          (typeof constructorName === 'string' && (
-            constructorName.length <= 2 || 
-            constructorName.startsWith('Firebase')
-          )) ||
-          // Check for common internal property markers if names are obscured
-          value._database || 
-          value._firestore || 
-          value._service ||
-          value.INTERNAL;
-
-        if (isInternal) {
-          return `[Internal Object: ${constructorName || 'Unknown'}]`;
+          constructorName === 'Y' || // Minified name reported by user
+          constructorName === 'Ka'   // Minified name reported by user
+        ) {
+          return `[Firebase ${constructorName}]`;
         }
 
         cache.add(value);
@@ -137,23 +114,15 @@ function safeStringify(obj: any): string {
     });
   } catch (err) {
     // Ultimate fallback if JSON.stringify still fails
-    try {
-      // Try to at least get keys and basic info
-      const keys = Object.keys(obj).join(', ');
-      return `{"error": "Stringify failure", "keys": "${keys}", "type": "${typeof obj}"}`;
-    } catch {
-      return `{"error": "Total serialization failure"}`;
-    }
+    return '{"error": "Failed to stringify object completely", "details": "Object contained non-serializable or deeply circular data"}';
   }
 }
 
 export function handleFirestoreError(error: any, operation: FirestoreErrorInfo['operationType'], path: string | null = null): never {
-  let info: any = {};
+  const authUser = getAuthService().currentUser;
   
+  let safeErrorMsg = "Unknown error";
   try {
-    const authUser = getAuthService().currentUser;
-    
-    let safeErrorMsg = "Unknown error";
     if (error instanceof Error) {
       safeErrorMsg = error.message;
     } else if (typeof error === 'string') {
@@ -164,27 +133,26 @@ export function handleFirestoreError(error: any, operation: FirestoreErrorInfo['
     } else {
       safeErrorMsg = String(error);
     }
-
-    info = {
-      error: safeErrorMsg,
-      operationType: operation,
-      path: path ? String(path) : null,
-      authInfo: {
-        userId: authUser?.uid || 'anonymous',
-        email: authUser?.email || '',
-        emailVerified: !!authUser?.emailVerified,
-        isAnonymous: !!authUser?.isAnonymous,
-        providerInfo: Array.isArray(authUser?.providerData) ? authUser.providerData.map(p => ({
-          providerId: String(p.providerId || ''),
-          displayName: String(p.displayName || ''),
-          email: String(p.email || '')
-        })) : []
-      }
-    };
-  } catch (prepareErr) {
-    console.error("Critical: Failed to prepare error info", prepareErr);
-    info = { error: "Failed to prepare error info", originalError: String(error) };
+  } catch (e) {
+    safeErrorMsg = "Critical error during error handling";
   }
+
+  const info: FirestoreErrorInfo = {
+    error: safeErrorMsg,
+    operationType: operation,
+    path: path ? String(path) : null,
+    authInfo: {
+      userId: authUser?.uid || 'anonymous',
+      email: authUser?.email || '',
+      emailVerified: !!authUser?.emailVerified,
+      isAnonymous: !!authUser?.isAnonymous,
+      providerInfo: Array.isArray(authUser?.providerData) ? authUser.providerData.map(p => ({
+        providerId: String(p.providerId || ''),
+        displayName: String(p.displayName || ''),
+        email: String(p.email || '')
+      })) : []
+    }
+  };
 
   const serialized = safeStringify(info);
   console.error('Firestore Error Payload:', serialized);
