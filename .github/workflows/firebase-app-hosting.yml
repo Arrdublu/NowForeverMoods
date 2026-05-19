@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   deploy:
@@ -25,4 +24,4 @@ jobs:
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Deploy to Firebase App Hosting
-        run: firebase apphosting:rollouts:create nowforevermoods-web --project nowforevermoods --location us-central1 --non-interactive
+        run: firebase apphosting:rollouts:create nowforevermoods-web --project nowforevermoods --non-interactive
