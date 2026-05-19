@@ -11,10 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check secret
+        run: |
+          if [ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}" ]; then
+            echo "Error: FIREBASE_SERVICE_ACCOUNT secret is missing."
+            echo "Please add your Firebase service account JSON to your GitHub repository's Actions secrets."
+            exit 1
+          fi
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Deploy to Firebase App Hosting
