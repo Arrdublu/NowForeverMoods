@@ -21,6 +21,7 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          service_account: 'github-actions-apphosting@nowforevermoods.iam.gserviceaccount.com'
       - name: Install Firebase CLI
         run: npm install -g firebase-tools
       - name: Deploy to Firebase App Hosting
