@@ -202,32 +202,36 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
         handleFirestoreError(err, 'create', 'availability');
       }
       
-      // Pre-fetch Payment Intent for frictionless transition
-      try {
-        const response = await fetch('/api/create-payment-intent', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            bookingId: docRef.id, 
-            userId: bookingData.userId 
-          }),
-        });
-        const data = await response.json();
-        
-        if (data.clientSecret) {
-          setActiveBooking({
-            id: docRef.id,
-            amount: Math.round(finalAmount * 100),
-            clientSecret: data.clientSecret
+        // Pre-fetch Payment Intent for frictionless transition
+        try {
+          const response = await fetch('/api/create-payment-intent', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              bookingId: docRef.id, 
+              userId: bookingData.userId 
+            }),
           });
-          setIsPaymentOpen(true);
-        } else {
-          throw new Error(data.error || "Payment terminal initialization failed");
+          const data = await response.json();
+          
+          if (data.clientSecret) {
+            setActiveBooking({
+              id: docRef.id,
+              amount: Math.round(finalAmount * 100),
+              clientSecret: data.clientSecret
+            });
+            setIsPaymentOpen(true);
+          } else {
+            throw new Error(data.error || "Payment terminal initialization failed");
+          }
+        } catch (payErr: any) {
+          console.error("Payment Intent Error:", payErr);
+          let msg = payErr.message;
+          if (msg.includes("Invalid API Key") || msg.includes("STRIPE") || msg.includes("secrets/")) {
+            msg = "Stripe API Key is missing or invalid. Please configure your Stripe Secret Key in the app settings to enable payments.";
+          }
+          alert(`Configuration Required: ${msg}`);
         }
-      } catch (payErr: any) {
-        console.error("Payment Intent Error:", payErr);
-        alert(`Friction Detected: ${payErr.message}`);
-      }
 
       // Email queue (fire and forget)
       try {

@@ -26,7 +26,9 @@ let stripeInstance: Stripe | null = null;
 function getStripe(): Stripe {
     if (!stripeInstance) {
         const key = process.env.STRIPE_SECRET_KEY;
-        if (!key) throw new Error('STRIPE_SECRET_KEY is required');
+        if (!key || key.includes('secrets/') || key === 'placeholder') {
+             throw new Error('Stripe API Key is missing or invalid. Please configure your actual STRIPE_SECRET_KEY in the app settings.');
+        }
         stripeInstance = new Stripe(key);
     }
     return stripeInstance;
