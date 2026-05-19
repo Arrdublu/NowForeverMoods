@@ -25,11 +25,9 @@ const bookingSchema = z.object({
   date: z.date({
     message: "A session date is required.",
   }),
-  notes: z.string().min(5, {
-    message: "Session notes must be at least 5 characters.",
-  }).max(500, {
+  notes: z.string().max(500, {
     message: "Notes must not exceed 500 characters.",
-  }),
+  }).optional().or(z.literal("")),
   paymentMode: z.enum(["full", "deposit"]),
   needsBeautyConsult: z.boolean().optional(),
 }).superRefine((data, ctx) => {
@@ -423,7 +421,7 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
                       <span className="flex items-center text-[10px] text-red-500 font-bold uppercase tracking-widest gap-1 animate-pulse">
                         <AlertCircle size={10} /> {errors.notes.message}
                       </span>
-                    ) : notes && notes.length >= 5 ? (
+                    ) : notes && notes.length > 0 ? (
                        <span className="flex items-center text-[10px] text-emerald-500 font-bold uppercase tracking-widest gap-1">
                         <CheckCircle2 size={10} /> Valid
                       </span>
@@ -436,7 +434,7 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
                 <textarea 
                   {...register("notes")}
                   className={`bg-brand-bg border-brand-line rounded-none min-h-[100px] p-4 focus-visible:outline-none focus-visible:ring-1 text-sm font-medium resize-y ${errors.notes ? "border-red-500 ring-1 ring-red-500 shadow-[0_0_10px_rgba(239,68,68,0.1)]" : "focus-visible:ring-brand-accent focus-visible:border-brand-accent"}`} 
-                  placeholder="Preferred location, specific requirements..."
+                  placeholder="Specify preferences, add session requirements, or ask questions..."
                   maxLength={500}
                 />
               </div>
