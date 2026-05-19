@@ -8,7 +8,8 @@ import { notFound } from 'next/navigation';
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
 
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+export async function generateMetadata(props: { params: Promise<{ id: string }> | { id: string } }): Promise<Metadata> {
+    const params = await props.params;
     const docRef = doc(db, 'products', params.id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
@@ -22,13 +23,20 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
         openGraph: {
             title: `${data.name} | NowForeverMoods`,
             description: data.description || `Purchase ${data.name} from the NowForeverMoods boutique.`,
-            images: data.imageUrl ? [{ url: data.imageUrl, width: 1200, height: 630 }] : [],
+            images: data.imageUrl ? [{ url: data.imageUrl, width: 1200, height: 630 }] : [{ url: '/og-image.jpg', width: 1200, height: 630 }],
             type: 'website'
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: `${data.name} | NowForeverMoods`,
+            description: data.description || `Purchase ${data.name} from the NowForeverMoods boutique.`,
+            images: data.imageUrl ? [data.imageUrl] : ['/og-image.jpg'],
         }
     };
 }
 
-export default async function Page({ params }: { params: { id: string } }) {
+export default async function Page(props: { params: Promise<{ id: string }> | { id: string } }) {
+    const params = await props.params;
     const docRef = doc(db, 'products', params.id);
     const docSnap = await getDoc(docRef);
     if (!docSnap.exists()) {
