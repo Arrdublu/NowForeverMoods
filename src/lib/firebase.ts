@@ -98,6 +98,9 @@ function safeStringify(obj: any): string {
           return `[Firebase ${constructorName}]`;
         }
 
+        if (cache.has(value)) {
+          return '[Circular]';
+        }
         cache.add(value);
 
         // Handle possible DOM nodes

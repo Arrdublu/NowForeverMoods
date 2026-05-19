@@ -68,6 +68,27 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
+            __html: `
+if (typeof window !== 'undefined') {
+  // Intercept console.warn to drop circular Firestore objects before they reach the iframe logger
+  const originalWarn = console.warn;
+  console.warn = function (...args) {
+    if (args[0] && typeof args[0] === 'object') {
+      try {
+        JSON.stringify(args[0]);
+      } catch (e) {
+        // If it's circular, sanitize it to a string so it logs safely without throwing a crash
+        return originalWarn("[Circular Firebase Log Suppressed]:", args[0].toString());
+      }
+    }
+    originalWarn.apply(console, args);
+  };
+}
+`
+          }}
+        />
+        <script
+          dangerouslySetInnerHTML={{
             __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=

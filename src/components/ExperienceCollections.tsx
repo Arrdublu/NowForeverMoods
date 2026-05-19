@@ -18,6 +18,16 @@ function PackageCard({ pkg, currency, onBook }: { pkg: any, currency: Currency, 
   const [isHovered, setIsHovered] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const [priceDisplay, setPriceDisplay] = useState<string>('');
+  const [depositDisplay, setDepositDisplay] = useState<string>('');
+
+  useEffect(() => {
+    const baseP = currency === 'USD' ? Number(pkg.usdPrice) : Number(pkg.jmdPrice);
+    const dep = baseP * 0.50;
+    setPriceDisplay(currency === 'USD' ? `$${baseP}` : `J$${baseP.toLocaleString()}`);
+    setDepositDisplay(currency === 'USD' ? `$${dep}` : `J$${dep.toLocaleString()}`);
+  }, [currency, pkg.usdPrice, pkg.jmdPrice]);
+
   useEffect(() => {
     if (isHovered && videoRef.current) {
       videoRef.current.play().catch(() => {});
@@ -25,11 +35,6 @@ function PackageCard({ pkg, currency, onBook }: { pkg: any, currency: Currency, 
       videoRef.current.pause();
     }
   }, [isHovered]);
-
-  const basePrice = currency === 'USD' ? pkg.usdPrice : pkg.jmdPrice;
-  const depositAmount = basePrice * 0.50;
-  const priceDisplay = currency === 'USD' ? `$${basePrice}` : `J$${basePrice.toLocaleString()}`;
-  const depositDisplay = currency === 'USD' ? `$${depositAmount}` : `J$${depositAmount.toLocaleString()}`;
 
   return (
     <motion.div 
@@ -135,7 +140,25 @@ export function ExperienceCollections() {
     const q = query(collection(getDb(), "packages"));
     const unsub = onSnapshot(q, (snapshot) => {
         const sortedPackages = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .map(doc => {
+            const data = doc.data();
+            return {
+              id: doc.id,
+              name: data.name || "",
+              description: data.description || "",
+              type: data.type || "signature",
+              usdPrice: Number(data.usdPrice) || 0,
+              jmdPrice: Number(data.jmdPrice) || 0,
+              isFeatured: Boolean(data.isFeatured),
+              features: Array.isArray(data.features) ? [...data.features] : [],
+              media: {
+                poster: data.media?.poster || "",
+                videoLoop: data.media?.videoLoop || ""
+              },
+              expertiseProviderArr: data.expertiseProviderArr || "",
+              expertiseProviderIok: data.expertiseProviderIok || ""
+            };
+          })
           .sort((a: any, b: any) => {
             if (a.isFeatured && !b.isFeatured) return -1;
             if (!a.isFeatured && b.isFeatured) return 1;

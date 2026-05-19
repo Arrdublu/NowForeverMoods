@@ -49,7 +49,23 @@ export function Portfolio() {
   useEffect(() => {
     const q = query(collection(getDb(), 'portfolio_items'), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snapshot) => {
-      const dbItems = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const dbItems = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: typeof data.title === 'string' ? data.title : "",
+          description: typeof data.description === 'string' ? data.description : "",
+          url: typeof data.url === 'string' ? data.url : "",
+          type: typeof data.type === 'string' ? data.type : "image",
+          theme_category: typeof data.theme_category === 'string' ? data.theme_category : "",
+          category: typeof data.category === 'string' ? data.category : "",
+          author: typeof data.author === 'string' ? data.author : "",
+          tags: Array.isArray(data.tags) ? data.tags.filter((t: any) => typeof t === 'string') : [],
+          artistry_themes: Array.isArray(data.artistry_themes) ? data.artistry_themes.filter((t: any) => typeof t === 'string') : [],
+          production_notes: typeof data.production_notes === 'string' ? data.production_notes : "",
+          text: typeof data.text === 'string' ? data.text : ""
+        };
+      });
       setItems(dbItems.length > 0 ? dbItems : STATIC_ARCHIVES);
       setLoading(false);
     }, (error) => {
