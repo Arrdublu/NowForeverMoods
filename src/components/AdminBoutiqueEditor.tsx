@@ -29,7 +29,21 @@ export function AdminBoutiqueEditor() {
     useEffect(() => {
         const q = query(collection(db, "products"));
         const unsub = onSnapshot(q, (snap) => {
-            setProducts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+            setProducts(snap.docs.map(doc => {
+               const data = doc.data();
+               return {
+                 id: doc.id,
+                 name: typeof data.name === 'string' ? data.name : "",
+                 category: typeof data.category === 'string' ? data.category : "",
+                 price: Number(data.price) || 0,
+                 currency: typeof data.currency === 'string' ? data.currency : "USD",
+                 imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : "",
+                 inStock: Number(data.inStock) || 0,
+                 isDigital: Boolean(data.isDigital),
+                 isActive: Boolean(data.isActive),
+                 downloadUrl: typeof data.downloadUrl === 'string' ? data.downloadUrl : ""
+               } as any;
+            }));
             setLoading(false);
         }, (error) => {
             import("../lib/firebase").then(({ handleFirestoreError }) => {

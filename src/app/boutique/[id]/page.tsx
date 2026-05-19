@@ -34,7 +34,18 @@ export default async function Page({ params }: { params: { id: string } }) {
     if (!docSnap.exists()) {
         notFound();
     }
-    const product = { id: docSnap.id, ...docSnap.data() };
+    const data = docSnap.data();
+    const product = {
+       id: docSnap.id,
+       name: typeof data.name === 'string' ? data.name : "",
+       description: typeof data.description === 'string' ? data.description : "",
+       price: Number(data.price) || 0,
+       currency: typeof data.currency === 'string' ? data.currency : "USD",
+       imageUrl: typeof data.imageUrl === 'string' ? data.imageUrl : "",
+       inStock: Number(data.inStock) || 0,
+       isDigital: Boolean(data.isDigital),
+       isActive: Boolean(data.isActive)
+    };
     
-    return <BoutiqueClientDetail product={product} />;
+    return <BoutiqueClientDetail product={product as any} />;
 }

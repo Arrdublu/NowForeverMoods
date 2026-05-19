@@ -129,7 +129,26 @@ export function AdminPackagesEditor() {
   useEffect(() => {
     const q = query(collection(getDb(), "packages"));
     const unsub = onSnapshot(q, (snapshot) => {
-      setPackages(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      const pkgs = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: typeof data.name === 'string' ? data.name : "",
+          description: typeof data.description === 'string' ? data.description : "",
+          type: typeof data.type === 'string' ? data.type : "signature",
+          usdPrice: Number(data.usdPrice) || 0,
+          jmdPrice: Number(data.jmdPrice) || 0,
+          isFeatured: Boolean(data.isFeatured),
+          features: Array.isArray(data.features) ? data.features.filter(f => typeof f === 'string') : [],
+          media: {
+            poster: data.media?.poster || "",
+            videoLoop: data.media?.videoLoop || ""
+          },
+          expertiseProviderArr: typeof data.expertiseProviderArr === 'string' ? data.expertiseProviderArr : "",
+          expertiseProviderIok: typeof data.expertiseProviderIok === 'string' ? data.expertiseProviderIok : ""
+        };
+      });
+      setPackages(pkgs);
       setLoading(false);
     }, (error) => {
       handleFirestoreError(error, 'list', 'packages');

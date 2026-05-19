@@ -70,19 +70,32 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
 if (typeof window !== 'undefined') {
-  // Intercept console.warn to drop circular Firestore objects before they reach the iframe logger
-  const originalWarn = console.warn;
-  console.warn = function (...args) {
-    if (args[0] && typeof args[0] === 'object') {
-      try {
-        JSON.stringify(args[0]);
-      } catch (e) {
-        // If it's circular, sanitize it to a string so it logs safely without throwing a crash
-        return originalWarn("[Circular Firebase Log Suppressed]:", args[0].toString());
-      }
+  // Intercept console logger to drop circular Firestore objects before they reach the iframe logger
+  const methods = ['log', 'warn', 'error', 'info', 'debug'];
+  methods.forEach(method => {
+    const original = console[method];
+    if (original) {
+      console[method] = function (...args) {
+        const safeArgs = args.map(arg => {
+          if (arg && typeof arg === 'object') {
+            try {
+              JSON.stringify(arg);
+              return arg;
+            } catch (e) {
+              // circular reference or other serialization error
+              try {
+                return "[Circular Object Suppressed: " + (arg.constructor ? arg.constructor.name : "Object") + "]";
+              } catch(err) {
+                return "[Circular Object Suppressed]";
+              }
+            }
+          }
+          return arg;
+        });
+        original.apply(console, safeArgs);
+      };
     }
-    originalWarn.apply(console, args);
-  };
+  });
 }
 `
           }}

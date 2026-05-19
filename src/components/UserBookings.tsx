@@ -24,7 +24,20 @@ export function UserBookings() {
       where("userId", "==", auth.currentUser.uid)
     );
     const unsub = onSnapshot(q, (snapshot) => {
-      setBookings(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+      setBookings(snapshot.docs.map(doc => {
+         const data = doc.data();
+         return {
+           id: doc.id,
+           packageId: typeof data.packageId === 'string' ? data.packageId : "",
+           packageName: typeof data.packageName === 'string' ? data.packageName : "",
+           userId: typeof data.userId === 'string' ? data.userId : "",
+           status: typeof data.status === 'string' ? data.status : "",
+           date: typeof data.date === 'string' ? data.date : "",
+           time: typeof data.time === 'string' ? data.time : "",
+           amount: Number(data.amount) || 0,
+           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : ""
+         } as any;
+      }));
     }, (error) => {
       handleFirestoreError(error, 'list', 'bookings');
     });

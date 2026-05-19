@@ -85,7 +85,23 @@ export function AdminDashboard() {
       qPortfolio,
       (snapshot) => {
         setPortfolioItems(
-          snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+          snapshot.docs.map((doc) => {
+             const data = doc.data();
+             return {
+                id: doc.id,
+                title: typeof data.title === 'string' ? data.title : "",
+                description: typeof data.description === 'string' ? data.description : "",
+                url: typeof data.url === 'string' ? data.url : "",
+                type: typeof data.type === 'string' ? data.type : "image",
+                theme_category: typeof data.theme_category === 'string' ? data.theme_category : "",
+                category: typeof data.category === 'string' ? data.category : "",
+                author: typeof data.author === 'string' ? data.author : "",
+                tags: Array.isArray(data.tags) ? data.tags.filter(t => typeof t === 'string') : [],
+                artistry_themes: Array.isArray(data.artistry_themes) ? data.artistry_themes.filter(t => typeof t === 'string') : [],
+                production_notes: typeof data.production_notes === 'string' ? data.production_notes : "",
+                text: typeof data.text === 'string' ? data.text : ""
+             } as any;
+          })
         );
       },
       (error) => {
@@ -136,7 +152,20 @@ export function AdminDashboard() {
       orderBy("createdAt", "desc"),
     );
     const unsubBookings = onSnapshot(qBookings, (snapshot) => {
-      setBookings(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      setBookings(snapshot.docs.map((doc) => {
+         const data = doc.data();
+         return {
+           id: doc.id,
+           packageId: typeof data.packageId === 'string' ? data.packageId : "",
+           packageName: typeof data.packageName === 'string' ? data.packageName : "",
+           userId: typeof data.userId === 'string' ? data.userId : "",
+           status: typeof data.status === 'string' ? data.status : "",
+           date: typeof data.date === 'string' ? data.date : "",
+           time: typeof data.time === 'string' ? data.time : "",
+           amount: Number(data.amount) || 0,
+           createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : ""
+         } as any;
+      }));
     }, (error) => {
       handleFirestoreError(error, "list" as any, "bookings");
     });
@@ -173,7 +202,18 @@ export function AdminDashboard() {
 
     const unsubscribe = onSnapshot(qTransactions, (snapshot) => {
       setTransactions(
-        snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })),
+        snapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+             id: doc.id,
+             amount: Number(data.amount) || 0,
+             status: typeof data.status === 'string' ? data.status : "",
+             currency: typeof data.currency === 'string' ? data.currency : "",
+             bookingId: typeof data.bookingId === 'string' ? data.bookingId : "",
+             userId: typeof data.userId === 'string' ? data.userId : "",
+             createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : ""
+          } as any;
+        })
       );
       setLoading(false);
     }, (error) => {

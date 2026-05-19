@@ -43,7 +43,14 @@ export default function BeautyArchitecturePage() {
             where("theme_category", "==", "Beauty Architecture")
         );
         const unsub = onSnapshot(q, (snapshot) => {
-            const images = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const images = snapshot.docs.map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    url: typeof data.url === 'string' ? data.url : "",
+                    type: typeof data.type === 'string' ? data.type : "image"
+                } as any;
+            });
             if (images.length > 0) {
                 setPortfolioImages(images);
             }

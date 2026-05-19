@@ -19,6 +19,8 @@ export default function PackageDetailsPage() {
   const [pkg, setPkg] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [priceDisplay, setPriceDisplay] = useState<string>('');
+  const [depositDisplay, setDepositDisplay] = useState<string>('');
 
   useEffect(() => {
     if (!id || typeof id !== 'string') return;
@@ -27,7 +29,27 @@ export default function PackageDetailsPage() {
         const docRef = doc(getDb(), "packages", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setPkg({ id: docSnap.id, ...docSnap.data() });
+          const data = docSnap.data();
+          setPkg({
+            id: docSnap.id,
+            name: typeof data.name === 'string' ? data.name : "",
+            description: typeof data.description === 'string' ? data.description : "",
+            type: typeof data.type === 'string' ? data.type : "signature",
+            usdPrice: Number(data.usdPrice) || 0,
+            jmdPrice: Number(data.jmdPrice) || 0,
+            isFeatured: Boolean(data.isFeatured),
+            features: Array.isArray(data.features) ? data.features.filter(f => typeof f === 'string') : [],
+            media: {
+              poster: data.media?.poster || "",
+              videoLoop: data.media?.videoLoop || ""
+            },
+            expertiseProviderArr: typeof data.expertiseProviderArr === 'string' ? data.expertiseProviderArr : "",
+            expertiseProviderIok: typeof data.expertiseProviderIok === 'string' ? data.expertiseProviderIok : "",
+            credits: {
+              production: data.credits?.production || "",
+              beauty: data.credits?.beauty || ""
+            }
+          });
         } else {
           console.error("No such package in Firestore!");
         }
@@ -39,6 +61,14 @@ export default function PackageDetailsPage() {
     };
     fetchPackage();
   }, [id]);
+
+  useEffect(() => {
+    if (!pkg) return;
+    const basePrice = currency === 'USD' ? Number(pkg.usdPrice || 0) : Number(pkg.jmdPrice || 0);
+    const depositAmount = basePrice * 0.50;
+    setPriceDisplay(currency === 'USD' ? `$${basePrice}` : `J$${basePrice.toLocaleString()}`);
+    setDepositDisplay(currency === 'USD' ? `$${depositAmount}` : `J$${depositAmount.toLocaleString()}`);
+  }, [currency, pkg]);
 
   if (loading) {
     return (
@@ -56,11 +86,6 @@ export default function PackageDetailsPage() {
       </div>
     );
   }
-
-  const basePrice = currency === 'USD' ? pkg.usdPrice : pkg.jmdPrice;
-  const depositAmount = basePrice ? basePrice * 0.50 : 0;
-  const priceDisplay = currency === 'USD' ? `$${basePrice}` : `J$${basePrice?.toLocaleString()}`;
-  const depositDisplay = currency === 'USD' ? `$${depositAmount}` : `J$${depositAmount?.toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-[#fafaf9] pt-24 pb-32">
