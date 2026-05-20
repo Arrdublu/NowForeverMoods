@@ -62,7 +62,11 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json(JSON.parse(text));
   } catch (error: any) {
-    console.error("Gemini API Error:", error);
-    return NextResponse.json({ error: error.message || "Failed to analyze image" }, { status: 500 });
+    if (error.status === 503) {
+      console.warn("Gemini API Rate Limited (503): Model experiencing high demand.");
+    } else {
+      console.error("Gemini API Error:", error);
+    }
+    return NextResponse.json({ error: error.message || "Failed to analyze image" }, { status: error.status || 500 });
   }
 }

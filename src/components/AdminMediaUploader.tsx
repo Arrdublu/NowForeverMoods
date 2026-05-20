@@ -161,7 +161,7 @@ export function AdminMediaUploader({
              throw new Error("Failed to analyze image via server api.");
           }
         } catch (error) {
-          handleFirestoreError(error, 'write' as any, 'gemini_tagging');
+          console.warn("Gemini tagging failed or rate limited. Using fallback (empty tags).", error);
           // Fallback to original name, empty tags - silently ignoring AI failure
         }
       }
