@@ -8,5 +8,9 @@ runConfig:
 env:
   - variable: STRIPE_SECRET_KEY
     value: secrets/STRIPE_SECRET_KEY
+  - variable: STRIPE_WEBHOOK_SECRET
+    value: secrets/STRIPE_WEBHOOK_SECRET
+  - variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    value: secrets/NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
   - variable: APP_URL
     value: https://nowforevermoods.com
