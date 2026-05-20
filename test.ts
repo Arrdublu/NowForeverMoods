@@ -7,7 +7,7 @@ const firebaseConfig = {
   projectId: "nowforevermoods",
   storageBucket: "nowforevermoods.firebasestorage.app",
   messagingSenderId: "36897396429",
-  appId: "1:36897396429:web:016dd6950b474ebf99fb84",
+  appId: "1:36897396429:web:31f415ee087d86fe99fb84",
 };
 
 const app = initializeApp(firebaseConfig);

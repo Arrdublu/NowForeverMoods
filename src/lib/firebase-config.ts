@@ -8,7 +8,7 @@ export const firebaseConfig = {
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || FALLBACK_PROJECT_ID,
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || `${FALLBACK_PROJECT_ID}.firebasestorage.app`,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "36897396429",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:36897396429:web:016dd6950b474ebf99fb84",
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:36897396429:web:31f415ee087d86fe99fb84",
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "",
 };
 
