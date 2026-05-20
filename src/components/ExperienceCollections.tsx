@@ -49,8 +49,8 @@ function PackageCard({ pkg, currency, onBook }: { pkg: any, currency: Currency, 
     >
       <div className="relative w-full h-[340px] md:h-[400px] overflow-hidden bg-black">
         <Image 
-          src={pkg.media.poster || ''} 
-          alt={pkg.name} 
+          src={pkg.media?.poster || '/hero.jpg'} 
+          alt={pkg.name || 'Package'} 
           fill
           className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${isHovered ? 'opacity-0' : 'opacity-100'}`}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

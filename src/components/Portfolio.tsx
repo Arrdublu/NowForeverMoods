@@ -285,7 +285,7 @@ export function Portfolio() {
                   {selectedItem.type === 'video' ? (
                      <video src={selectedItem.url || ''} autoPlay loop muted playsInline className="w-full h-auto max-h-[85vh] object-contain" />
                   ) : (
-                     <Image src={selectedItem.url || ''} alt={selectedItem.title || 'Portfolio item'} width={1200} height={1600} priority placeholder={typeof selectedItem.url === 'object' ? "blur" : "empty"} className="w-full h-auto max-h-[85vh] object-contain" referrerPolicy="no-referrer" sizes="100vw" />
+                     <Image src={selectedItem.url || '/hero.jpg'} alt={selectedItem.title || 'Portfolio item'} width={1200} height={1600} priority placeholder={typeof selectedItem.url === 'object' ? "blur" : "empty"} className="w-full h-auto max-h-[85vh] object-contain" referrerPolicy="no-referrer" sizes="100vw" />
                   )}
 
                   {/* Floating Action Bar */}

@@ -424,7 +424,7 @@ export function AdminMediaUploader({
                 {item.type === 'video' ? (
                   <video src={item.url || ''} className="object-cover w-full h-full" muted loop playsInline onMouseEnter={e => e.currentTarget.play()} onMouseLeave={e => e.currentTarget.pause()} />
                 ) : (
-                  <Image src={item.url || ''} alt={item.title || "Portfolio"} fill className="object-cover" sizes="(max-width: 768px) 50vw, 33vw" />
+                  <Image src={item.url || '/hero.jpg'} alt={item.title || "Portfolio"} fill className="object-cover" sizes="(max-width: 768px) 50vw, 33vw" />
                 )}
                 <div className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-4 text-center">
                   <span className="text-[10px] font-bold text-white uppercase tracking-widest line-clamp-1">{item.title || 'Untitled'}</span>
@@ -478,7 +478,7 @@ export function AdminMediaUploader({
                  {editingItem.type === 'video' ? (
                    <video src={editingItem.url || ''} className="w-full h-full object-contain" controls />
                  ) : (
-                   <Image src={editingItem.url || ''} alt={editingItem.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 50vw" />
+                   <Image src={editingItem.url || '/hero.jpg'} alt={editingItem.title} fill className="object-contain" sizes="(max-width: 768px) 100vw, 50vw" />
                  )}
                </div>
             )}

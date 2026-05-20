@@ -70,29 +70,33 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
 if (typeof window !== 'undefined') {
-  // Intercept console logger to drop circular Firestore objects before they reach the iframe logger
   const methods = ['log', 'warn', 'error', 'info', 'debug'];
+  // Keep native reference if available
+  const nativeLog = console._log || console.log;
   methods.forEach(method => {
     const original = console[method];
     if (original) {
       console[method] = function (...args) {
         const safeArgs = args.map(arg => {
+          if (arg instanceof Error) {
+            return { message: arg.message, stack: arg.stack, name: arg.name };
+          }
           if (arg && typeof arg === 'object') {
             try {
               JSON.stringify(arg);
               return arg;
             } catch (e) {
-              // circular reference or other serialization error
-              try {
-                return "[Circular Object Suppressed: " + (arg.constructor ? arg.constructor.name : "Object") + "]";
-              } catch(err) {
-                return "[Circular Object Suppressed]";
-              }
+              return "[Circular or Non-Serializable Object Suppressed]";
             }
           }
           return arg;
         });
-        original.apply(console, safeArgs);
+        try {
+          original.apply(console, safeArgs);
+        } catch (innerErr) {
+          // If the AI Studio logger or Next.js overlay still throws 
+          // (e.g. converting circular structure to JSON), catch it and log safely
+        }
       };
     }
   });

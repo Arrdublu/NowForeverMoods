@@ -193,7 +193,7 @@ export default function BeautyArchitecturePage() {
                                     />
                                 ) : (
                                     <Image 
-                                        src={item.url} 
+                                        src={item.url || '/hero.jpg'} 
                                         alt={item.title || "Macro beauty shot"} 
                                         width={600} 
                                         height={800} 
