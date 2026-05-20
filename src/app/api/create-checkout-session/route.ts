@@ -64,6 +64,10 @@ export async function POST(req: Request) {
         });
         return NextResponse.json({ id: session.id, url: session.url });
     } catch (error: any) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        const isStripeMissing = error.message?.includes('Stripe API Key') || error.message?.includes('STRIPE_SECRET_KEY');
+        return NextResponse.json({ 
+            error: error.message, 
+            stripeKeyMissing: isStripeMissing 
+        }, { status: isStripeMissing ? 400 : 500 });
     }
 }

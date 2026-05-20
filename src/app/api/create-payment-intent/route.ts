@@ -72,7 +72,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ clientSecret: paymentIntent.client_secret });
     } catch (error: any) {
         console.error("Payment intent error:", error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        const isStripeMissing = error.message?.includes('Stripe API Key') || error.message?.includes('STRIPE_SECRET_KEY');
+        return NextResponse.json({ 
+            error: error.message, 
+            stripeKeyMissing: isStripeMissing 
+        }, { status: isStripeMissing ? 400 : 500 });
     } finally {
         console.log(`Total API time: ${Date.now() - startTime}ms`);
     }

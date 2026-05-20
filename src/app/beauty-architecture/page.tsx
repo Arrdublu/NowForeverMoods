@@ -4,13 +4,14 @@ import { Navbar } from "../../components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "motion/react";
 import { useGeoPricing } from "../../hooks/useGeoPricing";
 import { getAuthService, getDb, handleFirestoreError } from "../../lib/firebase";
 import { addDoc, collection, query, where, onSnapshot } from "firebase/firestore";
 import { StripePayment } from "../../components/StripePayment";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 import { LeadMagnet } from "../../components/LeadMagnet";
 
@@ -68,6 +69,45 @@ export default function BeautyArchitecturePage() {
     const [clientSecret, setClientSecret] = useState<string | null>(null);
     const [bookingId, setBookingId] = useState<string | null>(null);
     const [userId, setUserId] = useState<string>("");
+    
+    // Sandbox simulation states
+    const [stripeKeyMissingError, setStripeKeyMissingError] = useState(false);
+    const [simulatedBooking, setSimulatedBooking] = useState<any>(null);
+
+    const handleSimulatedBeautyPaymentSuccess = async () => {
+        if (!simulatedBooking) return;
+        setLoading(true);
+        try {
+            const docRefId = simulatedBooking.bookingId;
+            const { doc, updateDoc, addDoc } = await import("firebase/firestore");
+            
+            // Mark booking payment status as paid
+            await updateDoc(doc(db, "bookings", docRefId), {
+                paymentStatus: "paid",
+                status: "confirmed"
+            });
+
+            // Create booking confirmation
+            const confirmData = {
+                bookingId: docRefId,
+                userId: simulatedBooking.userId,
+                amount: simulatedBooking.amount,
+                status: "confirmed",
+                confirmedAt: new Date(),
+                isSimulated: true
+            };
+            await addDoc(collection(db, "bookingConfirmations"), confirmData);
+
+            // Redirect to success
+            window.location.href = "/booking/success";
+        } catch (e) {
+            console.error(e);
+            alert("Simulation failed, please try again.");
+        } finally {
+            setLoading(false);
+            setStripeKeyMissingError(false);
+        }
+    };
 
     // Form Validation Logic
     const isFutureDate = (selectedDate: string) => {
@@ -132,12 +172,25 @@ export default function BeautyArchitecturePage() {
             const data = await res.json();
             if (data.clientSecret) {
                 setClientSecret(data.clientSecret);
+            } else if (data.stripeKeyMissing) {
+                setSimulatedBooking({
+                    bookingId: docRef.id,
+                    userId: user?.uid || 'guest',
+                    amount: Math.round(totalGeoPrice * 100)
+                });
+                setStripeKeyMissingError(true);
             } else {
                 alert("Failed to initiate checkout");
             }
 
-        } catch (error) {
-            handleFirestoreError(error, "write", "bookings");
+        } catch (error: any) {
+            console.error(error);
+            const msg = error.message || "";
+            if (msg.includes("Stripe API Key") || msg.includes("STRIPE") || msg.includes("secrets/")) {
+                setStripeKeyMissingError(true);
+            } else {
+                handleFirestoreError(error, "write", "bookings");
+            }
         } finally {
             setLoading(false);
         }
@@ -302,6 +355,61 @@ export default function BeautyArchitecturePage() {
                     </div>
                 </section>
             </main>
+
+            <Dialog open={stripeKeyMissingError} onOpenChange={setStripeKeyMissingError}>
+                <DialogContent className="bg-brand-surface border border-brand-line text-brand-text sm:max-w-[550px] rounded-3xl p-0 overflow-hidden shadow-2xl z-[200]">
+                    <div className="p-8 border-b border-brand-line bg-brand-surface">
+                        <span className="text-[9px] uppercase tracking-[0.4em] text-brand-accent font-bold mb-1 block">Environment Guide</span>
+                        <h3 className="font-serif text-2xl text-brand-black italic">Stripe Environment Setup Required</h3>
+                        <p className="text-[10px] text-brand-muted uppercase tracking-widest font-semibold mt-1">Stripe Secret API Key is currently missing or invalid.</p>
+                    </div>
+                    
+                    <div className="p-8 space-y-6">
+                        <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-xs space-y-2 text-amber-800">
+                            <span className="font-bold flex items-center gap-2"><AlertCircle size={14} /> Live Payments Blocked</span>
+                            <p className="leading-relaxed font-semibold font-sans">To activate production-ready card checkouts, you must configure your Stripe credentials in the App Settings.</p>
+                        </div>
+
+                        <div className="space-y-3 font-sans">
+                            <h4 className="text-[11px] uppercase tracking-widest font-bold text-brand-black">Step-by-Step Instructions:</h4>
+                            <ol className="text-xs text-brand-muted space-y-2.5 list-decimal list-inside font-medium leading-relaxed">
+                                <li>Open the <span className="text-brand-black font-semibold">Settings</span> panel (gear icon) in the AI Coding agent chat or workspace.</li>
+                                <li>Scroll down to the <span className="text-brand-black font-semibold">Environment Secrets / Variables</span> section.</li>
+                                <li>Add <strong className="text-brand-black font-semibold">STRIPE_SECRET_KEY</strong> as a secret variable with your Stripe secret key (<code className="font-mono text-amber-600 bg-amber-50/50 px-1 border border-amber-100 rounded">sk_test_...</code>).</li>
+                                <li>Add <strong className="text-brand-black font-semibold">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</strong> as a public variable with your Stripe publishable key (<code className="font-mono text-amber-600 bg-amber-50/50 px-1 border border-amber-100 rounded">pk_test_...</code>).</li>
+                                <li>Save settings, configure your keys, and click <span className="text-brand-black font-semibold">Restart Dev Server</span>.</li>
+                            </ol>
+                        </div>
+
+                        <div className="h-px bg-brand-line !my-6" />
+
+                        <div className="space-y-4">
+                            <div className="text-center font-sans">
+                                <span className="text-[9px] uppercase tracking-widest font-bold text-brand-muted block mb-1">Sandbox Trial Available</span>
+                                <p className="text-[11px] text-brand-muted leading-relaxed">You can bypass live Stripe checkouts to fully test booking confirmations, studio log files, and database pipelines.</p>
+                            </div>
+
+                            <div className="grid gap-3 pt-2">
+                                <Button 
+                                    onClick={handleSimulatedBeautyPaymentSuccess}
+                                    disabled={loading}
+                                    className="bg-brand-black text-white hover:bg-zinc-800 rounded-none h-14 uppercase tracking-widest text-[10px] font-bold shadow-md w-full flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98]"
+                                >
+                                    {loading ? <Loader2 className="animate-spin w-4 h-4 text-white" /> : "Proceed in Sandbox Simulator Mode"}
+                                </Button>
+                                
+                                <Button 
+                                    variant="outline"
+                                    onClick={() => setStripeKeyMissingError(false)}
+                                    className="rounded-none border-brand-line h-12 uppercase tracking-widest text-[10px] font-bold text-brand-muted hover:text-brand-black hover:bg-brand-bg transition-colors"
+                                >
+                                    Configure Key Later
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

@@ -67,6 +67,33 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [stripeKeyMissingError, setStripeKeyMissingError] = useState(false);
+  const [simulatedDocId, setSimulatedDocId] = useState<string | null>(null);
+  const [simulatedAmount, setSimulatedAmount] = useState<number>(0);
+
+  const handleSimulatedPaymentSuccess = async () => {
+    if (!simulatedDocId) return;
+    setLoading(true);
+    try {
+      const confirmData = {
+        bookingId: simulatedDocId,
+        userId: auth.currentUser?.uid || 'guest',
+        amount: simulatedAmount,
+        status: 'confirmed',
+        confirmedAt: new Date(),
+        isSimulated: true
+      };
+      await addDoc(collection(db, "bookingConfirmations"), confirmData);
+      setStripeKeyMissingError(false);
+      setIsPaymentOpen(false);
+      setSuccessMessage("Your booking has been confirmed successfully (via Simulation Mode)! We look forward to your session.");
+    } catch (err) {
+      console.error(err);
+      alert("Simulation failed, please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -221,16 +248,23 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
               clientSecret: data.clientSecret
             });
             setIsPaymentOpen(true);
+          } else if (data.stripeKeyMissing) {
+            setSimulatedDocId(docRef.id);
+            setSimulatedAmount(Math.round(finalAmount * 100));
+            setStripeKeyMissingError(true);
           } else {
             throw new Error(data.error || "Payment terminal initialization failed");
           }
         } catch (payErr: any) {
           console.error("Payment Intent Error:", payErr);
-          let msg = payErr.message;
-          if (msg.includes("Invalid API Key") || msg.includes("STRIPE") || msg.includes("secrets/")) {
-            msg = "Stripe API Key is missing or invalid. Please configure your Stripe Secret Key in the app settings to enable payments.";
+          let msg = payErr.message || "";
+          if (msg.includes("Invalid API Key") || msg.includes("STRIPE") || msg.includes("secrets/") || msg.includes("missing or invalid")) {
+            setSimulatedDocId(docRef.id);
+            setSimulatedAmount(Math.round(finalAmount * 100));
+            setStripeKeyMissingError(true);
+          } else {
+            alert(`Booking initiated, however payment setup failed: ${msg}`);
           }
-          alert(`Configuration Required: ${msg}`);
         }
 
       // Email queue (fire and forget)
@@ -573,6 +607,61 @@ function BookingFormContent({ isOpen, onClose, selectedPackage, currency }: Book
             >
               Accept
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={stripeKeyMissingError} onOpenChange={setStripeKeyMissingError}>
+        <DialogContent className="bg-brand-surface border border-brand-line text-brand-text sm:max-w-[550px] rounded-3xl p-0 overflow-hidden shadow-2xl z-[200]">
+          <div className="p-8 border-b border-brand-line bg-brand-surface">
+            <span className="text-[9px] uppercase tracking-[0.4em] text-brand-accent font-bold mb-1 block">Environment Guide</span>
+            <h3 className="font-serif text-2xl text-brand-black italic">Stripe Environment Setup Required</h3>
+            <p className="text-[10px] text-brand-muted uppercase tracking-widest font-semibold mt-1">Stripe Secret API Key is currently missing or invalid.</p>
+          </div>
+          
+          <div className="p-8 space-y-6">
+            <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-xl text-xs space-y-2 text-amber-800">
+              <span className="font-bold flex items-center gap-2"><AlertCircle size={14} /> Live Payments Blocked</span>
+              <p className="leading-relaxed font-semibold font-sans">To activate production-ready card checkouts, you must configure your Stripe credentials in the App Settings.</p>
+            </div>
+
+            <div className="space-y-3 font-sans">
+              <h4 className="text-[11px] uppercase tracking-widest font-bold text-brand-black">Step-by-Step Instructions:</h4>
+              <ol className="text-xs text-brand-muted space-y-2.5 list-decimal list-inside font-medium leading-relaxed">
+                <li>Open the <span className="text-brand-black font-semibold">Settings</span> panel (gear icon) in the AI Coding agent chat or workspace.</li>
+                <li>Scroll down to the <span className="text-brand-black font-semibold">Environment Secrets / Variables</span> section.</li>
+                <li>Add <strong className="text-brand-black font-semibold">STRIPE_SECRET_KEY</strong> as a secret variable with your Stripe secret key (<code className="font-mono text-amber-600 bg-amber-50/50 px-1 border border-amber-100 rounded">sk_test_...</code>).</li>
+                <li>Add <strong className="text-brand-black font-semibold">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</strong> as a public variable with your Stripe publishable key (<code className="font-mono text-amber-600 bg-amber-50/50 px-1 border border-amber-100 rounded">pk_test_...</code>).</li>
+                <li>Save settings, configure your keys, and click <span className="text-brand-black font-semibold">Restart Dev Server</span>.</li>
+              </ol>
+            </div>
+
+            <div className="h-px bg-brand-line !my-6" />
+
+            <div className="space-y-4">
+              <div className="text-center font-sans">
+                <span className="text-[9px] uppercase tracking-widest font-bold text-brand-muted block mb-1">Sandbox Trial Available</span>
+                <p className="text-[11px] text-brand-muted leading-relaxed">You can bypass live Stripe checkouts to fully test booking confirmations, database logs, and system email pipelines.</p>
+              </div>
+
+              <div className="grid gap-3 pt-2">
+                <Button 
+                  onClick={handleSimulatedPaymentSuccess}
+                  disabled={loading}
+                  className="bg-brand-black text-white hover:bg-zinc-800 rounded-none h-14 uppercase tracking-widest text-[10px] font-bold shadow-md w-full flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98]"
+                >
+                  {loading ? <Loader2 className="animate-spin w-4 h-4 text-white" /> : "Proceed in Sandbox Simulator Mode"}
+                </Button>
+                
+                <Button 
+                  variant="outline"
+                  onClick={() => setStripeKeyMissingError(false)}
+                  className="rounded-none border-brand-line h-12 uppercase tracking-widest text-[10px] font-bold text-brand-muted hover:text-brand-black hover:bg-brand-bg transition-colors"
+                >
+                  Configure Key Later
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
